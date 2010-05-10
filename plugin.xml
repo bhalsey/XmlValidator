@@ -1,0 +1,23 @@
+<plugin name='xml-validator' version='0.1' grailsVersion='1.2.1 &gt; *'>
+  <author>Brent Halsey</author>
+  <authorEmail>mrbrent at gmail dot com</authorEmail>
+  <title>Plugin summary/headline</title>
+  <description>\
+Validate XML on the request with a given schema.  Throws XXX exception for any validation errors.
+Issues: 
+    -Not entirely efficient with streams, 
+    -breaks cacheing of xml in request (for now)
+</description>
+  <documentation>http://grails.org/plugin/xml-validator</documentation>
+  <resources>
+    <resource>BuildConfig</resource>
+    <resource>DataSource</resource>
+    <resource>UrlMappings</resource>
+  </resources>
+  <dependencies>
+    <resolvers>
+      <resolver type='grailsPlugins' name='grailsPlugins' />
+    </resolvers>
+  </dependencies>
+  <behavior />
+</plugin>
