@@ -34,7 +34,7 @@ class XmlValidatorGrailsPlugin {
     def authorEmail = "mrbrent at gmail dot com"
     def title = "Plugin summary/headline"
     def description = '''\\
-Validate XML on the request with a given schema.  Throws XXX exception for any validation errors.
+Validate XML on the request with a given schema.  Throws SAXException exception for any validation errors.
 In a sense, overloading .XML (really adding a method call with the same name as the read accessor)
 Issues: 
     -Not entirely efficient with streams, 
