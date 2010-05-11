@@ -33,7 +33,7 @@ class XmlValidatorGrailsPlugin {
     def author = "Brent Halsey"
     def authorEmail = "mrbrent at gmail dot com"
     def title = "Plugin summary/headline"
-    def description = '''\\
+    def description = '''
 Validate XML on the request with a given schema.  Throws SAXException exception for any validation errors.
 In a sense, overloading .XML (really adding a method call with the same name as the read accessor)
 Issues: 
@@ -107,10 +107,10 @@ Issues:
     }
 
     /**
-     * Expects a schema path of type -- 
+     * Expects a schemaInput of type -- xsd string, or a path to an xsd file
      * Throws a SAXException if not valid
      */
-    Object validateSchemaAndParse(String schemaPath, HttpServletRequest request ) throws SAXException {
+    Object validateSchemaAndParse(String schemaInput, HttpServletRequest request ) throws SAXException {
 	long time1 = System.currentTimeMillis()
         // TODO cache schema object (in controller??)
 	// TODO cache xml obj, read in if someone else has already cached it
@@ -122,7 +122,16 @@ Issues:
 	//def servletContext = applicationContext.mainContext.servletContext
 	def servletContext = applicationContext.servletContext
 
-        StreamSource schemaSource = new StreamSource( servletContext.getResourceAsStream(schemaPath) )
+	StreamSource schemaSource 
+	if (schemaInput.trim().startsWith("<xs:schema")) {
+	    // schema input is an xsd string
+	    schemaSource = new StreamSource( new StringReader(schemaInput) )
+	}
+	else {
+	    // schema input is an xsd file
+	    schemaSource = new StreamSource( servletContext.getResourceAsStream(schemaInput) )
+	}
+
         Schema schema = factory.newSchema( schemaSource )
         
         // begin code we need to execute per thread
