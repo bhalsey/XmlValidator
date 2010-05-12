@@ -8,15 +8,12 @@ import javax.xml.validation.Schema
 import javax.xml.validation.SchemaFactory 
 import javax.xml.validation.Validator 
 import org.xml.sax.SAXException
-//import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationContext
 
 
 class XmlValidatorGrailsPlugin {
-    // NO // private ServletContext servletContext; // BH, does grails automatically fill this in??
-    //private ServletContext servletContext; // BH, does spring automatically fill this in?? (with impl interface)
-    private ApplicationContext applicationContext
-
+    protected ApplicationContext applicationContext
+    protected Map<String, Schema> schemaCache
 
     // the plugin version
     def version = "0.1"
@@ -44,12 +41,14 @@ Issues:
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/xml-validator"
 
+    public XmlValidatorGrailsPlugin() {
+	schemaCache = new HashMap<String, Schema>()
+    }
+
     def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional), this event occurs before 
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
     }
 
     def doWithDynamicMethods = { ctx ->
@@ -57,7 +56,6 @@ Issues:
     }
 
     def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
 	this.applicationContext = applicationContext
     }
 
@@ -75,35 +73,16 @@ Issues:
     }
 
     /**
-     * Add our XML() method to the request metaclass
+     * Add our XML(schemaInput) method to the request metaclass
      *
      */
     void extendReqResp() {
 	def requestMc = GroovySystem.metaClassRegistry.getMetaClass(HttpServletRequest)
 	//def requestMc = GroovySystem.metaClassRegistry.getMetaClass(ApplicationHttpRequest)
 
-	requestMc.XML << { String schemaFile ->
-	    // validate with schemaFile
-	    //log.error "**** Woohoo! in our plugin! ****"
-	    println "**** Woot! in our plugin! ****"
-	    // TODO be careful of reading in stream and using it up!
-	    // BH - can we reset the stream?
-	    //return XML.parse((HttpServletRequest) delegate)
-	    return validateSchemaAndParse( schemaFile, (HttpServletRequest) delegate )
-
-
+	requestMc.XML << { String schemaInput ->
+	    return validateSchemaAndParse( schemaInput, (HttpServletRequest) delegate )
 	}
-//	    org.apache.catalina.core.ApplicationHttpRequest.metaClass.getXMLv = { String name ->
-//		    log.error "**** Woohoo! in our plugin! ****"
-//		    // TODO be careful of reading in stream and using it up!
-//		    return XML.parse((HttpServletRequest) delegate)
-//	    }
-//
-//	    javax.servlet.http.HttpServletRequest.metaClass.getXMLv = { String name ->
-//		    log.error "**** Woohoo! in our plugin! ****"
-//		    // TODO be careful of reading in stream and using it up!
-//		    return XML.parse((HttpServletRequest) delegate)
-//	    }
     }
 
     /**
@@ -112,28 +91,9 @@ Issues:
      */
     Object validateSchemaAndParse(String schemaInput, HttpServletRequest request ) throws SAXException {
 	long time1 = System.currentTimeMillis()
-        // TODO cache schema object (in controller??)
-	// TODO cache xml obj, read in if someone else has already cached it
-        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-
-	//ServletContext servletContext = request.servletContext  // only available in later versions of the servlet api
-	//def servletContext = ApplicationHolder.application.mainContext.servletContext
-
-	//def servletContext = applicationContext.mainContext.servletContext
-	def servletContext = applicationContext.servletContext
-
-	StreamSource schemaSource 
-	if (schemaInput.trim().startsWith("<xs:schema")) {
-	    // schema input is an xsd string
-	    schemaSource = new StreamSource( new StringReader(schemaInput) )
-	}
-	else {
-	    // schema input is an xsd file
-	    schemaSource = new StreamSource( servletContext.getResourceAsStream(schemaInput) )
-	}
-
-        Schema schema = factory.newSchema( schemaSource )
         
+	Schema schema = lookupSchema( schemaInput )
+
         // begin code we need to execute per thread
         Validator validator = schema.newValidator()
 	long time2 = System.currentTimeMillis()
@@ -145,9 +105,6 @@ Issues:
 
         //String xmlString = new StreamingMarkupBuilder().bind { out << xml }.toString()
         String xmlString = request.inputStream.text
-
-	// BH, does this work??? --> Nope!
-	//request.inputStream.reset()
 
         StringReader xmlStringReader = new StringReader(xmlString)
         Source source = new StreamSource(xmlStringReader)
@@ -168,13 +125,31 @@ Issues:
 	return xmlObj
     }
 
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
+    /**
+     * Look up the schema if we've cached it, otherwise, create a new one.
+     *
+     */
+    protected synchronized Schema lookupSchema( String schemaInput ) {
+	if (schemaCache.containsKey( schemaInput )) {
+	    return schemaCache.get( schemaInput )
+	}
 
-    public ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
 
+	StreamSource schemaSource 
+	if (schemaInput.trim().startsWith("<xs:schema")) {
+	    // schema input is an xsd string
+	    schemaSource = new StreamSource( new StringReader(schemaInput) )
+	}
+	else {
+	    // schema input is an xsd file
+	    def servletContext = applicationContext.servletContext
+	    schemaSource = new StreamSource( servletContext.getResourceAsStream(schemaInput) )
+	}
+
+        Schema schema = factory.newSchema( schemaSource )
+	schemaCache.put( schemaInput, schema )
+	return schema
+    }
 
 }
