@@ -26,16 +26,14 @@ class XmlValidatorGrailsPlugin {
             "grails-app/views/error.gsp"
     ]
 
-    // TODO Fill in these fields
     def author = "Brent Halsey"
     def authorEmail = "mrbrent at gmail dot com"
     def title = "Plugin summary/headline"
     def description = '''
-Validate XML on the request with a given schema.  Throws SAXException exception for any validation errors.
-In a sense, overloading .XML (really adding a method call with the same name as the read accessor)
-Issues: 
-    -Not entirely efficient with streams, 
-    -breaks cacheing of xml in request (for now)
+Provides a simple mechanism to validate XML on the request with a given schema.
+Schema can be passed in as a relative file path or as a string.  Throws
+SAXException exception for any validation errors.  In a sense, overloads .XML
+(really adding a method call with the same name as the read accessor).
 '''
 
     // URL to the plugin's documentation
@@ -78,7 +76,6 @@ Issues:
      */
     void extendReqResp() {
 	def requestMc = GroovySystem.metaClassRegistry.getMetaClass(HttpServletRequest)
-	//def requestMc = GroovySystem.metaClassRegistry.getMetaClass(ApplicationHttpRequest)
 
 	requestMc.XML << { String schemaInput ->
 	    return validateSchemaAndParse( schemaInput, (HttpServletRequest) delegate )
