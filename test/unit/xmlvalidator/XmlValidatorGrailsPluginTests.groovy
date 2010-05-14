@@ -2,6 +2,8 @@ package xmlvalidator
 
 import grails.test.*
 import org.codehaus.groovy.grails.plugins.testing.*
+import org.codehaus.groovy.grails.plugins.xmlvalidator.XmlValidator
+import org.xml.sax.SAXException
 
 class XmlValidatorGrailsPluginTests extends GrailsUnitTestCase {
     protected void setUp() {
@@ -12,23 +14,76 @@ class XmlValidatorGrailsPluginTests extends GrailsUnitTestCase {
         super.tearDown()
     }
 
-    void testSomething() {
-	def plugin = new XmlValidatorGrailsPlugin()
+    void testInvalidXml() {
+	def plugin = new XmlValidator()
 
-	def xmlString = createXml()
+	def xmlString = createInvalidXml()
+
+        // create a mock request with the getInputStream() method
+        // overridden to return a reader of our string
 	def mockRequest = new GrailsMockHttpServletRequest()
-	mockRequest.getMetaClass().getInputStream = { ->
-	    // should be an inputstream, but has a getText() method
+	GrailsMockHttpServletRequest.metaClass.getInputStream = { ->
+	    // should be an inputstream, but also has a getText() method
 	    return new StringReader(xmlString) 
 	}
-	def schemaInput = createXsd()
-	plugin.validateSchemaAndParse( schemaInput, mockRequest )
 
-	assertTrue true
+	def schemaInput = createXsd()
+
+        try {
+            plugin.validateSchemaAndParse( schemaInput, mockRequest )
+            fail "validate method should have thrown an exception"
+        }
+        catch (SAXException se) {
+            assertTrue true
+        }
 
     }
 
-    String createXml() {
+    void testValidXml() {
+	def plugin = new XmlValidator()
+
+	def xmlString = createValidXml()
+
+        // create a mock request with the getInputStream() method
+        // overridden to return a reader of our string
+	GrailsMockHttpServletRequest.metaClass.getInputStream = { ->
+	    // should be an inputstream, but also has a getText() method
+	    return new StringReader(xmlString) 
+	}
+	def mockRequest = new GrailsMockHttpServletRequest()
+
+	def schemaInput = createXsd()
+
+        try {
+            plugin.validateSchemaAndParse( schemaInput, mockRequest )
+            assertTrue true
+        }
+        catch (SAXException se) {
+            fail "validate method should NOT have thrown an exception"
+        }
+
+    }
+
+    String createValidXml() {
+	return '''
+<records>
+  <car name='HSV Maloo' make='Holden' year='2006'>
+    <country>Australia</country>
+    <record type='speed'>Production Pickup Truck with speed of 271kph</record>
+  </car>
+  <car name='P50' make='Peel' year='1962'>
+    <country>Isle of Man</country>
+    <record type='size'>Smallest Street-Legal Car at 99cm wide and 59 kg in weight</record>
+  </car>
+  <car name='Royale' make='Bugatti' year='1931'>
+    <country>France</country>
+    <record type='price'>Most Valuable Car at $15 million</record>
+  </car>
+</records>
+'''
+    }
+
+    String createInvalidXml() {
 	return '''
 <records>
   <car name='HSV Maloo' mmake='Holden' year='2006'>
