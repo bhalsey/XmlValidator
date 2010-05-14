@@ -1,19 +1,10 @@
 import org.codehaus.groovy.grails.plugins.xmlvalidator.XmlValidator
-import grails.converters.XML
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.ServletContext
-import javax.xml.XMLConstants 
-import javax.xml.transform.Source 
-import javax.xml.transform.stream.StreamSource 
-import javax.xml.validation.Schema 
-import javax.xml.validation.SchemaFactory 
-import javax.xml.validation.Validator 
 import org.xml.sax.SAXException
 import org.springframework.context.ApplicationContext
 
 
 class XmlValidatorGrailsPlugin {
-    protected ApplicationContext applicationContext
     protected XmlValidator xmlValidator
 
     // the plugin version
@@ -33,17 +24,13 @@ class XmlValidatorGrailsPlugin {
     def description = '''
 Provides a simple mechanism to validate XML on the request with a given schema.
 Schema can be passed in as a relative file path or as a string.  Throws
-SAXException exception for any validation errors.  In a sense, overloads .XML
-(really adding a method call with the same name as the read accessor).
+SAXException exception for any validation errors.  Syntax is easy to remember:
+change the familiar request.XML access into a method with the schema passed as 
+an argument: request.XML( schemaInput )
 '''
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/xml-validator"
-
-    // Constructor
-    public XmlValidatorGrailsPlugin() {
-	xmlValidator = new XmlValidator()
-    }
 
     def doWithWebDescriptor = { xml ->
     }
@@ -56,7 +43,7 @@ SAXException exception for any validation errors.  In a sense, overloads .XML
     }
 
     def doWithApplicationContext = { applicationContext ->
-	this.applicationContext = applicationContext
+	xmlValidator = new XmlValidator(applicationContext)
     }
 
     def onChange = { event ->
@@ -73,7 +60,9 @@ SAXException exception for any validation errors.  In a sense, overloads .XML
     }
 
     /**
-     * Add our XML(schemaInput) method to the request metaclass
+     * Add our XML(schemaInput) method to the request metaclass.  The backing method,
+     * XmlValidator.validateSchemaAndParse() throws a SAXException when there's a 
+     * validation error.
      *
      */
     void extendReqResp() {

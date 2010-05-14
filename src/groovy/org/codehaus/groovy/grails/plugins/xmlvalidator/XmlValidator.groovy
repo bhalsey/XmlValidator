@@ -6,15 +6,19 @@ import javax.servlet.ServletContext
 import javax.xml.XMLConstants 
 import javax.xml.transform.Source 
 import javax.xml.transform.stream.StreamSource 
+import groovy.xml.StreamingMarkupBuilder
 import javax.xml.validation.Schema 
 import javax.xml.validation.SchemaFactory 
 import javax.xml.validation.Validator 
 import org.xml.sax.SAXException
+import org.springframework.context.ApplicationContext
 
 class XmlValidator {
+    protected ApplicationContext applicationContext
     protected Map<String, Schema> schemaCache
 
-    public XmlValidator() {
+    public XmlValidator(ApplicationContext applicationContext) {
+	this.applicationContext = applicationContext
 	schemaCache = new HashMap<String, Schema>()
     }
 
@@ -32,19 +36,22 @@ class XmlValidator {
 	long time2 = System.currentTimeMillis()
 	println "Time to build validator in ms: " + (time2 - time1)
 
-	// TODO read in cached xml if exists
-	Object xml = request.getAttribute(grails.converters.XML.CACHED_XML);
-        if (xml != null) return xml;
+	// read in cached xml if exists (request.XML was previously called)
+        String xmlString
+	Object xmlObj = request.getAttribute(grails.converters.XML.CACHED_XML);
+        if (xmlObj != null) {
+	    xmlString = new StreamingMarkupBuilder().bind { out << xmlObj }.toString()
+	}
+	else {
+	    xmlString = request.inputStream.text
+	}
 
-        //String xmlString = new StreamingMarkupBuilder().bind { out << xml }.toString()
-        println "inputStream is: ${request.inputStream}"
-        String xmlString = request.inputStream.text
+	//println "xmlString is:\n$xmlString"
 
         StringReader xmlStringReader = new StringReader(xmlString)
         Source source = new StreamSource(xmlStringReader)
         
-	// Validate
-	validator.validate(source) // throws exception if not valid
+	validator.validate(source) // throws SAXException if not valid
 
 	long time3 = System.currentTimeMillis()
 	println "Time to validate in ms: " + (time3 - time2)
@@ -52,8 +59,12 @@ class XmlValidator {
 	//log.info "request is valid"
 	println "request is valid"
 
-	// Now Parse
-	def xmlObj = XML.parse(xmlString)
+	// if it was already cached, return it
+	if (xmlObj != null) 
+	    return xmlObj
+
+	// Parse and cache it
+	xmlObj = XML.parse(xmlString)
 	request.setAttribute(grails.converters.XML.CACHED_XML, xmlObj);
 
 	return xmlObj
@@ -61,10 +72,11 @@ class XmlValidator {
 
     /**
      * Look up the schema if we've cached it, otherwise, create a new one.
-     *
+     * Synchronized because SchemaFactory is not thread safe.
      */
     protected synchronized Schema lookupSchema( String schemaInput ) {
 	if (schemaCache.containsKey( schemaInput )) {
+	    println "Returning cached schema"
 	    return schemaCache.get( schemaInput )
 	}
 
