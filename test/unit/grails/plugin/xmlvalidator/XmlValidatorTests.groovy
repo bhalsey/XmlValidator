@@ -1,8 +1,8 @@
-package org.codehaus.groovy.grails.plugins.xmlvalidator
+package grails.plugin.xmlvalidator
 
 import grails.test.*
 import org.codehaus.groovy.grails.plugins.testing.*
-import org.codehaus.groovy.grails.plugins.xmlvalidator.XmlValidator
+import grails.plugin.xmlvalidator.XmlValidator
 import org.xml.sax.SAXException
 
 class XmlValidatorTests extends GrailsUnitTestCase {

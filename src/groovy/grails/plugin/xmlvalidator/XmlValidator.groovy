@@ -1,4 +1,4 @@
-package org.codehaus.groovy.grails.plugins.xmlvalidator
+package grails.plugin.xmlvalidator
 
 import grails.converters.XML
 import javax.servlet.http.HttpServletRequest

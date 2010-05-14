@@ -1,4 +1,4 @@
-import org.codehaus.groovy.grails.plugins.xmlvalidator.XmlValidator
+import grails.plugin.xmlvalidator.XmlValidator
 import javax.servlet.http.HttpServletRequest
 import org.xml.sax.SAXException
 import org.springframework.context.ApplicationContext
