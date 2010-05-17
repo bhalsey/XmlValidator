@@ -27,14 +27,10 @@ class XmlValidator {
      * Throws a SAXException if not valid
      */
     Object validateSchemaAndParse(String schemaInput, HttpServletRequest request ) throws SAXException {
-	long time1 = System.currentTimeMillis()
-        
 	Schema schema = lookupSchema( schemaInput )
 
         // begin code we need to execute per thread
         Validator validator = schema.newValidator()
-	long time2 = System.currentTimeMillis()
-	println "Time to build validator in ms: " + (time2 - time1)
 
 	// read in cached xml if exists (request.XML was previously called)
         String xmlString
@@ -46,18 +42,10 @@ class XmlValidator {
 	    xmlString = request.inputStream.text
 	}
 
-	//println "xmlString is:\n$xmlString"
-
         StringReader xmlStringReader = new StringReader(xmlString)
         Source source = new StreamSource(xmlStringReader)
         
 	validator.validate(source) // throws SAXException if not valid
-
-	long time3 = System.currentTimeMillis()
-	println "Time to validate in ms: " + (time3 - time2)
-
-	//log.info "request is valid"
-	println "request is valid"
 
 	// if it was already cached, return it
 	if (xmlObj != null) 
@@ -76,7 +64,6 @@ class XmlValidator {
      */
     protected synchronized Schema lookupSchema( String schemaInput ) {
 	if (schemaCache.containsKey( schemaInput )) {
-	    println "Returning cached schema"
 	    return schemaCache.get( schemaInput )
 	}
 
