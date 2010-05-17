@@ -22,9 +22,9 @@ class XmlValidatorGrailsPlugin {
     def authorEmail = "mrbrent at gmail dot com"
     def title = "Plugin summary/headline"
     def description = '''
-Provides a simple mechanism to validate XML on the request with a given schema.
+Provides a simple mechanism to validate xml on the request with a given schema.
 Schema can be passed in as a relative file path or as a string.  Throws
-SAXException exception for any validation errors.  Syntax is easy to remember:
+SAXException for any validation errors.  Syntax is easy to remember:
 change the familiar request.XML access into a method with the schema passed as 
 an argument: request.XML( schemaInput )
 '''
