@@ -22,8 +22,7 @@ a `SAXException` is thrown with a helpful message pointing out the problem in th
 
 The following examples use the same car records xml and schema as the Groovy User Guide's
 section on 
-[http://groovy.codehaus.org/Validating+XML+with+a+W3C+XML+Schema]
-(Validating XML with a W3C XML Schema).
+[Validating XML with a W3C XML Schema](http://groovy.codehaus.org/Validating+XML+with+a+W3C+XML+Schema).
 
 Example without validation:
 ---------------------------
