@@ -7,8 +7,8 @@ Summary
 Provides a simple mechanism to validate xml on the request with a given schema.
 Schema can be passed in as a relative file path or as a string.  Throws
 `SAXException` for any validation errors.  Syntax is easy to remember:
-change the familiar request.xml access into a method with the schema passed as 
-an argument: request.XML( schemaInput )
+change the familiar `request.XML` access into a method with the schema passed as 
+an argument: `request.XML( schemaInput )`
 
 The XmlValidator plugin simplifies validating incoming xml requests to a
 RESTful web service.  The default converters plugin in Grails provides a simple
@@ -195,3 +195,9 @@ After downloading and extracting the code, run `grails package-plugin` to create
 The examples shown here are taken from an example application with sample
 curl client scripts available at:
 [http://github.com/bhalsey/ExampleXmlValidator](http://github.com/bhalsey/ExampleXmlValidator)
+
+Author
+------
+
+Brent Halsey
+
