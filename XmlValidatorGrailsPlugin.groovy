@@ -8,7 +8,7 @@ class XmlValidatorGrailsPlugin {
     protected XmlValidator xmlValidator
 
     // the plugin version
-    def version = "0.1"
+    def version = "0.1.1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.1 > *"
     // the other plugins this plugin depends on
@@ -22,7 +22,7 @@ class XmlValidatorGrailsPlugin {
 
     def author = "Brent Halsey"
     def authorEmail = "mrbrent at gmail dot com"
-    def title = "Plugin summary/headline"
+    def title = "Validate request.XML against an xml schema"
     def description = '''
 Provides a simple mechanism to validate xml on the request with a given schema.
 Schema can be passed in as a relative file path or as a string.  Throws
