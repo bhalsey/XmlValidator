@@ -199,5 +199,5 @@ curl client scripts available at:
 Author
 ------
 
-Brent Halsey
+Brent Halsey - mrbrent at gmail dot com
 
